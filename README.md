@@ -1,7 +1,7 @@
 # Nand2Tetris
-
+=============
 ##Building a Modern Computer From First Principles
-
+--------------------------------------------------
 These are my completed projects for Nand2Tetris, which aims to build a computer starting with a Nand gate and working my way up to an operating system. So far I have completed the following:
 
 1. Implemented basic chips using a hardware description language - Not, And, Or, Xor, Mux, DMux, Not16, And16, Or16, Mux16, Or8Way, Mux4Way16, Mux8Way16, DMux4Way, DMux8Way
