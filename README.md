@@ -1,5 +1,5 @@
-# Nand2Tetris
-=============
+#Nand2Tetris
+
 ##Building a Modern Computer From First Principles
 --------------------------------------------------
 These are my completed projects for Nand2Tetris, which aims to build a computer starting with a Nand gate and working my way up to an operating system. So far I have completed the following:
@@ -11,4 +11,3 @@ These are my completed projects for Nand2Tetris, which aims to build a computer 
 3. Given a data flip flop, implemented a 1-bit register, 16-bit register, RAM8, RAM64, RAM512, RAM4K, RAM16K, and a Program Counter in HDL
 
 4. Wrote a program that multiplies two integers as well as a program that fills all of a screen's pixels with black when a keyboard key is pressed, both written in an assembly language.
-
