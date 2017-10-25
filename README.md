@@ -1,6 +1,6 @@
-#Nand2Tetris
+# Nand2Tetris
 
-##Building a Modern Computer From First Principles
+## Building a Modern Computer From First Principles
 --------------------------------------------------
 These are my completed projects for Nand2Tetris, which aims to build a computer starting with a Nand gate and working my way up to an operating system. So far I have completed the following:
 
