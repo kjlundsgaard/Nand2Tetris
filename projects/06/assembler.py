@@ -1,4 +1,5 @@
 import sys
+
 COMP = {
     '0': '0101010',
     '1': '0111111',
@@ -50,6 +51,7 @@ JUMP = {
     'JMP': '111',
 }
 
+
 class Parser(object):
     def __init__(self, data):
         self.commands = []
@@ -65,24 +67,6 @@ class Parser(object):
         if "/" in line:
             line = line.split("/", 1)[0]
         return line.strip()
-
-    def next_command(self, gen):
-        try:
-            return next(gen)
-        except StopIteration:
-            return None
-
-    def unpack(self, data):
-        return (line for line in data if line[0] != '/' and not line.isspace())
-
-    def parse(self, line):
-        for i, char in enumerate(line):
-            if char == '/' and line[i+1] == '/':
-                return
-            if char == '@':
-                if not self.sym_table.contains(line[i:]):
-                    pass
-        print 'line: ', line
 
 
 class SymbolTable(object):
@@ -118,7 +102,6 @@ class Translator(object):
     def handle_C_instruction(self, line):
         # parse it into dest=comp;jump
         # return string concatenated by lookups
-        # import pdb;pdb.set_trace()
         translated_string = '111'
         if '=' in line:
             split_line = line.split('=')
@@ -173,7 +156,6 @@ class Main(object):
                 continue
             # if none of these conditions are hit, keep incrementing program line
             program_line += 1
-        # print self.table.table
 
     def second_pass(self):
         translated_commands = []
@@ -199,7 +181,6 @@ class Main(object):
                 continue
             else:
                 translated_commands.append(self.translator.handle_C_instruction(line))
-        # print translated_commands
         return translated_commands
 
 
