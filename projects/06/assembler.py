@@ -144,18 +144,22 @@ class Main(object):
         self.parser = Parser(self.data)
         self.commands = self.parser.commands
         self.translator = Translator()
+        self.filename = self.asm_file.split(".")[0]
 
     def read_file(self):
         with open(self.asm_file) as f:
             data = f.readlines()
         return data
 
-    def write_file(self):
-        pass
+    def write_file(self, output_lines):
+        with open('%sassembled.hack' % self.filename, 'w') as output_file:
+            for line in output_lines:
+                output_file.write(line + '\n')
 
     def assemble(self):
         self.first_pass()
-        self.second_pass()
+        output_lines = self.second_pass()
+        self.write_file(output_lines)
 
     def first_pass(self):
         program_line = 0
@@ -165,7 +169,7 @@ class Main(object):
             # don't increment program counter because this shouldn't count as a program line
             if line[0] == '(':
                 if not self.table.contains(line[1:-1]):
-                    self.table.add_entry(line[1:-1], program_line + 1)
+                    self.table.add_entry(line[1:-1], program_line)
                 continue
             # if none of these conditions are hit, keep incrementing program line
             program_line += 1
@@ -195,6 +199,7 @@ class Main(object):
                 continue
             else:
                 translated_commands.append(self.translator.handle_C_instruction(line))
+        # print translated_commands
         return translated_commands
 
 
