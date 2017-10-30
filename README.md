@@ -10,4 +10,8 @@ These are my completed projects for Nand2Tetris, which aims to build a computer 
 
 3. Given a data flip flop, implemented a 1-bit register, 16-bit register, RAM8, RAM64, RAM512, RAM4K, RAM16K, and a Program Counter in HDL
 
-4. Wrote a program that multiplies two integers as well as a program that fills all of a screen's pixels with black when a keyboard key is pressed, both written in an assembly language.
+4. Wrote a program that multiplies two integers as well as a program that fills all of a screen's pixels with black when a keyboard key is pressed, both written in an assembly language
+
+5. Build CPU and RAM (including screen and keyboard memory) in HDL, and combine with ROM32K to build full Computer chip
+
+6. Write an assembler that takes in a file written in the hack assembly language and outputs the file assembled into binary
