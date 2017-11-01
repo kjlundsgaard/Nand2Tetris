@@ -47,9 +47,9 @@ CHIP CPU {
     Not(in=instruction[15], out=not15);
     Or(a=not15, b=instruction[5], out=loadA);
     // takes in aluout OR instruction depending if A or C instruction
-    ARegister(in=Aregin, load=loadA, out=regAout);
+    ARegister(in=Aregin, load=loadA, out=regAout, out[0..14]=addressM);
 
-    And(a=instruction[15], b=instruction[4], out=loadD)
+    And(a=instruction[15], b=instruction[4], out=loadD);
     // load to D based on d2 and if it's a C instruction
     DRegister(in=ALUout, load=loadD, out=regDout);
 
@@ -62,24 +62,25 @@ CHIP CPU {
     ALU(x=x, y=y,
         zx=instruction[11],
         nx=instruction[10],
-        zy=instrcution[9],
+        zy=instruction[9],
         ny=instruction[8],
         f=instruction[7],
         no=instruction[6],
         out=ALUout, out=outM, zr=zero, ng=neg);
 
     // determine if program needs to jump and use for input to ALU load
-    Not(in=zr, out=nonzero);
-    Not(in=ng, out=pos);
+    Not(in=zero, out=nonzero);
+    Not(in=neg, out=pos);
     And(a=nonzero, b=pos, out=nonzeropos);
     And(a=instruction[0], b=nonzeropos, out=j3);
-    And(a=instruction[1], b=zr, out=j2);
-    And(a=instruction[2], b=ng, out=j1);
+    And(a=instruction[1], b=zero, out=j2);
+    And(a=instruction[2], b=neg, out=j1);
     Or(a=j3, b=j2, out=j3ORj2);
     Or(a=j3ORj2, b=j1, out=jump);
 
-    PC(in=regAout, load=jump, inc=true, reset=reset, out=pc[0..14]);
+    PC(in=regAout, load=jump, inc=true, reset=reset, out[0..14]=pc);
 
-    // determine where to write output value of ALU by dest
-    DMux()
+    // d3 determines whether outM is 0 or 1
+    And(a=instruction[3], b=instruction[15], out=writeM);
+
 }
