@@ -102,7 +102,7 @@ class Translator(object):
     def handle_C_instruction(self, line):
         # parse it into dest=comp;jump
         # return string concatenated by lookups
-        translated_string = '111'
+        c_prefix = '111'
         if '=' in line:
             split_line = line.split('=')
             dest_lookup = split_line[0]
@@ -116,7 +116,7 @@ class Translator(object):
         binary_comp = COMP[comp_lookup]
         binary_dest = DEST[dest_lookup]
         binary_jump = JUMP[jump_lookup]
-        return translated_string + binary_comp + binary_dest + binary_jump
+        return '{}{}{}{}'.format(c_prefix, binary_comp, binary_dest, binary_jump)
 
 
 class Main(object):
