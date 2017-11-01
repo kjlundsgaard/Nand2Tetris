@@ -42,7 +42,7 @@ CHIP CPU {
     // Put your code here:
 
     // 15th bit of instruction tells whether A or C
-    Mux16(a=ALUout, b=instruction, sel=instruction[15], out=Aregin);
+    Mux16(a=instruction, b=ALUout, sel=instruction[15], out=Aregin);
     // determine whether to load into A, don't load only if C instruction but d1 == 0
     Not(in=instruction[15], out=not15);
     Or(a=not15, b=instruction[5], out=loadA);
@@ -51,13 +51,10 @@ CHIP CPU {
 
     And(a=instruction[15], b=instruction[4], out=loadD);
     // load to D based on d2 and if it's a C instruction
-    DRegister(in=ALUout, load=loadD, out=regDout);
+    DRegister(in=ALUout, load=loadD, out=x);
 
     // determines from a bit which of registers (A or M) to input as y in computations
-    Mux16(a=regAout, b=inM, sel=instruction[13], out=y);
-
-    // determines whether to use data from Dregister from a bit
-    Mux16(a=regDout, b=false, sel=instruction[13], out=x);
+    Mux16(a=regAout, b=inM, sel=instruction[12], out=y);
 
     ALU(x=x, y=y,
         zx=instruction[11],
@@ -71,12 +68,14 @@ CHIP CPU {
     // determine if program needs to jump and use for input to ALU load
     Not(in=zero, out=nonzero);
     Not(in=neg, out=pos);
+
     And(a=nonzero, b=pos, out=nonzeropos);
     And(a=instruction[0], b=nonzeropos, out=j3);
     And(a=instruction[1], b=zero, out=j2);
     And(a=instruction[2], b=neg, out=j1);
     Or(a=j3, b=j2, out=j3ORj2);
-    Or(a=j3ORj2, b=j1, out=jump);
+    Or(a=j3ORj2, b=j1, out=maybzjump);
+    And(a=instruction[15],b=maybzjump, out=jump);
 
     PC(in=regAout, load=jump, inc=true, reset=reset, out[0..14]=pc);
 
