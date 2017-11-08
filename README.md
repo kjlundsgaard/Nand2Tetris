@@ -15,3 +15,5 @@ These are my completed projects for Nand2Tetris, which aims to build a computer 
 5. Build CPU and RAM (including screen and keyboard memory) in HDL, and combine with ROM32K to build full Computer chip
 
 6. Write an assembler that takes in a file written in the hack assembly language and outputs the file assembled into binary
+
+7. Implement a VM Translator that takes in a file written in VM code and outputs a file with corresponding hack assembly commands
