@@ -73,8 +73,8 @@ class Parser():
 class CodeWriter():
     """writes the assembly code that implements the parsed command"""
 
-    def __init__(self, filename):
-        self.input_filename = os.path.splitext(os.path.basename(filename))[0]
+    def __init__(self, basename):
+        self.input_filename = basename
         self.mapping = {
             'local': 'LCL',
             'argument': 'ARG',
@@ -267,9 +267,11 @@ class Main():
 
     def __init__(self, vm_file):
         self.filename = vm_file
+        self.basename = os.path.splitext(os.path.basename(vm_file))[0]
         self.parser = Parser(self.filename)
-        self.writer = CodeWriter('{}.asm'.format(self.filename))
-        self.output_filename = vm_file.split('.')[0]
+        self.writer = CodeWriter(self.basename)
+        self.directory = os.path.dirname(vm_file)
+        self.suffix = '.asm'
 
     def translate(self):
         command = self.parser.advance()
@@ -283,8 +285,24 @@ class Main():
 
     def write_file(self):
         """writes and saves output assembly file"""
-        with open('%s.asm' % self.output_filename, 'w') as output_file:
-            print('writing to {}.asm'.format(self.output_filename))
+        # put an infinite loop at the end of the program
+        if self.directory:
+            output_filename = '{directory}/{filename}{suffix}'.format(
+                directory=self.directory,
+                filename=self.basename,
+                suffix=self.suffix
+            )
+        else:
+            output_filename = '{filename}{suffix}'.format(
+                filename=self.basename,
+                suffix=self.suffix
+            )
+        self.writer.commands_list.append("""
+            (END)
+            @END
+            0;JMP   //FOREVER LOOP""")
+        with open('%s' % output_filename, 'w') as output_file:
+            print('writing to {}'.format(output_filename))
             output_file.write('\n'.join(self.writer.commands_list))
 
 
