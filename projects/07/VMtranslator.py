@@ -81,6 +81,7 @@ class CodeWriter():
             'this': 'THIS',
             'that': 'THAT',
             'temp': '5',
+            'pointer': '3',
         }
         self.jump_ctr = 0
         self.commands_list = []
@@ -130,26 +131,24 @@ class CodeWriter():
                 A=D-1
                 M=-M""")
         elif asm_command in set(['eq', 'lt', 'gt']):
-            jump_command = "J"+asm_command.to_upper()
+            jump_command = "J"+asm_command.upper()
             self.append_command("""//{cmd}
-                @-1 //-1 is 0xfffffff which is true
-                D=A
                 @R14
-                M=D
+                M=-1 //-1 is 0xfffffff which is true
                 @SP
                 D=M
                 A=D-1
                 D=M
                 A=A-1
                 //D is zero if x and y are equal
-                D=D-M
+                D=M-D
                 //decrement stack point
                 @SP
                 M=M-1
-                //jump if values are equal
+                //jump if values are equal, greaterthan, or lessthan
                 @{filename}.jmp{ctr}
                 D;{jump_command}
-                //if we're here, x!=y, so set R14 to false
+                //if we're here, the jump condition failed, so set R14 to false
                 @R14
                 M=0
             ({filename}.jmp{ctr})
@@ -161,10 +160,6 @@ class CodeWriter():
                 M=D
                 """.format(cmd=asm_command, jump_command=jump_command, filename=self.input_filename, ctr=self.jump_ctr))
             self.jump_ctr += 1
-        elif asm_command == 'gt':
-            pass
-        elif asm_command == 'lt':
-            pass
         elif asm_command == 'and':
             self.append_command("""//and
                 @SP
@@ -196,31 +191,44 @@ class CodeWriter():
         """composes pushpop commands in assembly and passes to write_file"""
         if asm_command == 'C_PUSH':
             if segment == 'constant':
-                self.append_command("""//push constant {}
-                @{}
+                self.append_command("""//push constant {value}
+                @{value}
                 D=A
                 @SP
                 A=M
                 M=D
                 @SP
-                M=M+1""".format(value, value))
-            if segment in set(['local', 'argument', 'this', 'that', 'temp']):
-                self.append_command("""//push {} {}
-                @{}
-                D=M
-                @{}
+                M=M+1""".format(value=value))
+            if segment in set(['temp', 'pointer']):
+                self.append_command("""//push {segment} {index}
+                @{seg_map}
+                D=A
+                @{index}
                 A=D+A
                 D=M
                 @SP
                 A=M
                 M=D
                 @SP
-                M=M+1""".format(segment, value, self.mapping[segment], value))
+                M=M+1""".format(segment=segment, index=value, seg_map=self.mapping[segment]))
+            if segment in set(['local', 'argument', 'this', 'that']):
+                self.append_command("""//push {segment} {index}
+                @{seg_map}
+                D=M
+                @{index}
+                A=D+A
+                D=M
+                @SP
+                A=M
+                M=D
+                @SP
+                M=M+1""".format(segment=segment, index=value, seg_map=self.mapping[segment]))
             if segment == 'static':
                 self.append_command("""//push static {index}
                 @{filename}.{index}
                 D=M
                 @SP
+                A=M
                 M=D
                 @SP
                 M=M+1""".format(index=value, filename=self.input_filename))
@@ -231,18 +239,17 @@ class CodeWriter():
             if segment == 'static':
                 self.append_command("""//pop static {index}
                 @SP
-                A=A-1
+                A=M-1
                 D=M
                 @{filename}.{index}
                 M=D
                 @SP
-                M=M-1
-                """.format(index=value, filename=self.input_filename))
-            if segment in set(['local', 'argument', 'this', 'that', 'temp']):
-                self.append_command("""//pop {} {}
-                @{}
-                D=M
-                @{}
+                M=M-1""".format(index=value, filename=self.input_filename))
+            if segment in set(['temp', 'pointer']):
+                self.append_command("""//pop {segment} {index}
+                @{seg_map}
+                D=A
+                @{index}
                 D=D+A
                 @R13
                 M=D
@@ -253,7 +260,23 @@ class CodeWriter():
                 A=M
                 M=D
                 @SP
-                M=M-1""".format(segment, value, self.mapping[segment], value))
+                M=M-1""".format(segment=segment, index=value, seg_map=self.mapping[segment]))
+            if segment in set(['local', 'argument', 'this', 'that']):
+                self.append_command("""//pop {segment} {index}
+                @{seg_map}
+                D=M
+                @{index}
+                D=D+A
+                @R13
+                M=D
+                @SP
+                A=M-1
+                D=M
+                @R13
+                A=M
+                M=D
+                @SP
+                M=M-1""".format(segment=segment, index=value, seg_map=self.mapping[segment]))
 
     def append_command(self, asm_commands):
         """push new set of asm commands into list"""
