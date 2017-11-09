@@ -11,9 +11,12 @@ def read_file(filename):
 
 class Parser():
     """parses each VM command into lexical elements"""
-    def __init__(self, filename):
-        self.file_data = read_file(filename)
-        self.commands = (line for line in self.file_data)
+    def __init__(self, filenames):
+        self.all_file_data = []
+        for f in filenames:
+            file_data = read_file(f)
+            self.all_file_data.extend(file_data)
+        self.commands = (line for line in self.all_file_data)
 
     def advance(self):
         return next(self.commands, None)
@@ -114,7 +117,6 @@ class CodeWriter():
                 @SP
                 M=M-1""")
         elif asm_command == 'sub':
-            # mostly same as add except order of M-D might be wrong????
             self.append_command("""//sub
                 @SP
                 D=M
@@ -291,35 +293,62 @@ class Main():
     def __init__(self, vm_file):
         self.filename = vm_file
         self.basename = os.path.splitext(os.path.basename(vm_file))[0]
-        self.parser = Parser(self.filename)
         self.writer = CodeWriter(self.basename)
         self.directory = os.path.dirname(vm_file)
         self.suffix = '.asm'
+        self.abspath = os.path.abspath(self.filename)
 
     def translate(self):
-        command = self.parser.advance()
+        if self.filename == '.' or self.filename == '..':
+            all_filenames = self.get_files_from_directory(self.abspath)
+        elif self.directory and not self.filename.endswith('.vm'):
+            all_filenames = self.get_files_from_directory(self.directory)
+        else:
+            all_filenames = [self.filename]
+
+        parser = Parser(all_filenames)
+        command = parser.advance()
         while command:
             # could be returning None if whitespace - returns tuples of empty strings?
-            parsed_elements = self.parser.parse(command)
+            parsed_elements = parser.parse(command)
             if parsed_elements:
                 self.writer.compose(parsed_elements)
-            command = self.parser.advance()
+            command = parser.advance()
         self.write_file()
 
     def write_file(self):
         """writes and saves output assembly file"""
         # put an infinite loop at the end of the program
         if self.directory:
-            output_filename = '{directory}/{filename}{suffix}'.format(
-                directory=self.directory,
-                filename=self.basename,
-                suffix=self.suffix
-            )
+            # this means a path to a file was passed in
+            if self.filename.endswith('.vm'):
+                output_filename = '{directory}/{filename}{suffix}'.format(
+                    directory=self.directory,
+                    filename=self.basename,
+                    suffix=self.suffix
+                )
+            else:
+                # this means a directory was passed in rather than a file
+                output_filename = '{directory}/{filename}{suffix}'.format(
+                    directory=self.directory,
+                    filename=os.path.abspath(self.directory).split('/')[-1],
+                    suffix=self.suffix
+                )
+
         else:
-            output_filename = '{filename}{suffix}'.format(
-                filename=self.basename,
-                suffix=self.suffix
-            )
+            # handle case of if . or .. is passed
+            if not self.filename.endswith('.vm'):
+                output_filename = '{directory}/{filename}{suffix}'.format(
+                    directory=self.filename,
+                    filename=os.path.abspath(self.abspath).split('/')[-1],
+                    suffix=self.suffix
+                )
+            else:
+                # this means we are already in the directory of the file
+                output_filename = '{filename}{suffix}'.format(
+                    filename=self.basename,
+                    suffix=self.suffix
+                )
         self.writer.commands_list.append("""
             (END)
             @END
@@ -328,6 +357,9 @@ class Main():
             print('writing to {}'.format(output_filename))
             output_file.write('\n'.join(self.writer.commands_list))
 
+    def get_files_from_directory(self, folder):
+        """takes in a single directory and translates all *.vm files in that path"""
+        return ['{}/{}'.format(folder, each) for each in os.listdir(folder) if each.endswith('.vm')]
 
 if __name__ == "__main__":
     try:
