@@ -2,3 +2,4 @@
 *.out
 *.hack
 tools/bin/
+*.pyc
