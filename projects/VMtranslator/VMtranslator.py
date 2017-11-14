@@ -61,11 +61,6 @@ class Main():
                     filename=self.basename,
                     suffix=self.suffix
                 )
-        parser.asm_commands_list.append("""
-            (END)
-            @END
-            0;JMP   //FOREVER LOOP""")
-        # import pdb;pdb.set_trace()
         with open('%s' % output_filename, 'w') as output_file:
             print('writing to {}'.format(output_filename))
             output_file.write('\n'.join(parser.asm_commands_list))

@@ -1,4 +1,5 @@
 from codewriter import CodeWriter
+import os
 
 
 def read_file(filename):
@@ -12,6 +13,9 @@ class Parser():
     """parses each VM command into lexical elements"""
     def __init__(self, filenames):
         self.asm_commands_list = []
+        file_basenames = set([os.path.splitext(os.path.basename(f))[0] for f in filenames])
+        if 'Sys' in file_basenames:
+            self.write_init()
         for f in filenames:
             file_data = (line for line in read_file(f))
             writer = CodeWriter(f)
@@ -24,6 +28,75 @@ class Parser():
 
     def advance(self, generator):
         return next(generator, None)
+
+    def write_init(self):
+        pass
+        # self.asm_commands_list.append("""
+        #     @256
+        #     D=A
+        #     @SP
+        #     M=D
+        #     @Sys.init
+        #     0;JMP
+        # """)
+        self.asm_commands_list.append("""
+            @256
+            D=A
+            @SP
+            M=D
+            @RET_Sys.init
+            D=A
+            @SP
+            A=M
+            M=D
+            @SP
+            M=M+1
+            @LCL
+            D=M
+            @SP
+            A=M
+            M=D
+            @SP
+            M=M+1
+            @ARG
+            D=M
+            @SP
+            A=M
+            M=D
+            @SP
+            M=M+1
+            // push THIS
+            @THIS
+            D=M
+            @SP
+            A=M
+            M=D
+            @SP
+            M=M+1
+            // push THAT
+            @THAT
+            D=M
+            @SP
+            A=M
+            M=D
+            @SP
+            M=M+1
+            // ARG = SP - {num_args} - 5
+            @SP
+            D=M
+            @5
+            D=D-A
+            @ARG
+            M=D
+            // LCL = SP
+            @SP
+            D=M
+            @LCL
+            M=D
+            @Sys.init
+            0;JMP
+            (RET_Sys.init)
+        """)
 
     def parse(self, command):
         command_type = ""
@@ -73,5 +146,17 @@ class Parser():
             return 'C_PUSH'
         elif command == 'pop':
             return 'C_POP'
+        elif command == 'label':
+            return 'C_LABEL'
+        elif command == 'goto':
+            return 'C_GOTO'
+        elif command == 'if-goto':
+            return 'C_IF'
+        elif command == 'function':
+            return 'C_FUNCTION'
+        elif command == 'call':
+            return 'C_CALL'
+        elif command == 'return':
+            return 'C_RETURN'
         else:
             return ''
