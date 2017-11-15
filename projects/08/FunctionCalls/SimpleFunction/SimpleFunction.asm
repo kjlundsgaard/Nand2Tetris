@@ -104,7 +104,7 @@
             D=M-D
             A=D
             D=M
-            @RET
+            @RET.0
             M=D
             // *ARG = pop
             @SP
@@ -150,7 +150,7 @@
             D=M
             @LCL
             M=D
-            @RET
+            @RET.0
             A=M
             0;JMP
         

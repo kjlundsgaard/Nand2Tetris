@@ -30,15 +30,6 @@ class Parser():
         return next(generator, None)
 
     def write_init(self):
-        pass
-        # self.asm_commands_list.append("""
-        #     @256
-        #     D=A
-        #     @SP
-        #     M=D
-        #     @Sys.init
-        #     0;JMP
-        # """)
         self.asm_commands_list.append("""
             @256
             D=A
