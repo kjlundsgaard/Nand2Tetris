@@ -16,8 +16,7 @@ class Analyzer(object):
         self.build_file_contents(fordir)
         self.output_file = self.get_output_file(fordir)
         self.tokenizer = Tokenizer(self.file_contents)
-        self.compilation_engine = CompilationEngine()
-        self.compiled_lines = []
+        self.compilation_engine = CompilationEngine(self.tokenizer)
 
     def get_output_file(self, fordir):
         """
@@ -56,22 +55,14 @@ class Analyzer(object):
         """
         uses compilation engine to compile tokenized input
         """
-        while self.tokenizer.has_more_tokens():
-            token = self.tokenizer.advance()
-            self.compile(token)
-        # self.write_file(self.compiled_lines)
+        self.compilation_engine.compile()
+        self.write_file(self.compilation_engine.contents)
 
-    def compile(self, tokens):
-        """parses the tokens and outputs structured xml output of code"""
-        for token in tokens:
-            # TODO: actually parse stuff
-            self.compiled_lines.append(token)
-
-    def write_file(self, lines):
+    def write_file(self, contents):
         """writes to xml file"""
         with open('{}' % self.output_file, 'w') as output_file:
             print('writing to {}'.format(self.output_file))
-            output_file.write('\n'.join(lines))
+            output_file.write('\n'.join(self.contents))
 
 
 if __name__ == "__main__":

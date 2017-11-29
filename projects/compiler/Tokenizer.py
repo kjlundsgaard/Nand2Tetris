@@ -56,6 +56,9 @@ class Tokenizer(object):
     def get_token_value(self):
         return self.current[1]
 
+    def look_ahead(self):
+        return self.tokens[1]
+
     def tokenize(self):
         cleaned_input = self.clean(self.file_contents)
         matches = MATCH_LEXICAL_ELEMENTS.findall(cleaned_input)
