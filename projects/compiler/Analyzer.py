@@ -40,6 +40,7 @@ class Analyzer(object):
             files = self.get_files_from_directory(fordir)
             for f in files:
                 self.file_contents.extend(self.read_file(f))
+        self.file_contents = ''.join(self.file_contents)
 
     def get_files_from_directory(self, folder):
         """takes in a single directory and gets all *.jack files in that path"""
@@ -56,10 +57,9 @@ class Analyzer(object):
         uses compilation engine to compile tokenized input
         """
         while self.tokenizer.has_more_tokens():
-            line_to_tokenize = self.tokenizer.advance()
-            tokens = self.tokenizer.tokenize(line_to_tokenize)
-            self.compile(tokens)
-        self.write_file(self.compiled_lines)
+            token = self.tokenizer.advance()
+            self.compile(token)
+        # self.write_file(self.compiled_lines)
 
     def compile(self, tokens):
         """parses the tokens and outputs structured xml output of code"""
@@ -79,4 +79,4 @@ if __name__ == "__main__":
         compiler = Analyzer(sys.argv[1])
     except IndexError as e:
         print "Error: Requires a .jack file or directory as input"
-    # compiler.analyze()
+    compiler.analyze()
