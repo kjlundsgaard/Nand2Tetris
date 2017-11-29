@@ -58,7 +58,7 @@ class CompilationEngine(object):
             self.write_next_token()
         self.write_next_token()  # (
         self.compile_param_list()
-        self.write_next_token() #  )
+        self.write_next_token()  # )
         self.compile_subroutine_body()
         self.decrease_indent()
         self.add_closing_tag('subroutineDec')
@@ -100,7 +100,7 @@ class CompilationEngine(object):
     def compile_statements(self):
         self.add_opening_tag('statements')
         self.increase_indent()
-        elif self.tokenizer.get_token_value() == 'do':
+        if self.tokenizer.get_token_value() == 'do':
             self.compile_do()
         elif self.tokenizer.get_token_value() == 'let':
             self.compile_let()
