@@ -57,7 +57,7 @@ class Tokenizer(object):
         return self.current[1]
 
     def look_ahead(self):
-        return self.tokens[1]
+        return self.tokens[0]
 
     def tokenize(self):
         cleaned_input = self.clean(self.file_contents)

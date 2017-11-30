@@ -60,8 +60,8 @@ class Analyzer(object):
 
     def write_file(self, contents):
         """writes to xml file"""
-        with open('{}' % self.output_file, 'w') as output_file:
-            print('writing to {}'.format(self.output_file))
+        with open('{}TEST'.format(self.output_file), 'w') as output_file:
+            print('writing to {}TEST'.format(self.output_file))
             output_file.write('\n'.join(self.contents))
 
 
