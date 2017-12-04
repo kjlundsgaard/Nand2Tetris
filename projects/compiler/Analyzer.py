@@ -16,7 +16,7 @@ class Analyzer(object):
         self.build_file_contents(fordir)
         self.output_file = self.get_output_file(fordir)
         self.tokenizer = Tokenizer(self.file_contents)
-        print self.tokenizer.tokens
+        self.write_tokens(self.tokenizer.token_output, fordir)
         self.compilation_engine = CompilationEngine(self.tokenizer)
 
     def get_output_file(self, fordir):
@@ -24,9 +24,9 @@ class Analyzer(object):
         creates name of xml output file to be written to
         """
         if fordir.endswith('.jack'):
-            return '{}TEST.xml'.format(os.path.abspath(fordir)[:-5])
+            return '{}kt.xml'.format(os.path.abspath(fordir)[:-5])
         else:
-            return '{}TEST.xml'.format(os.path.abspath(fordir))
+            return '{}kt.xml'.format(os.path.abspath(fordir))
 
     def build_file_contents(self, fordir):
         """
@@ -65,6 +65,15 @@ class Analyzer(object):
             print('writing to {}'.format(self.output_file))
             output_file.write(''.join(self.compilation_engine.contents))
 
+    def write_tokens(self, tokens, fordir):
+        """writes tokens to xml file"""
+        if fordir.endswith('.jack'):
+            output_file = '{}ktT.xml'.format(os.path.abspath(fordir)[:-5])
+        else:
+            output_file = '{}ktT.xml'.format(os.path.abspath(fordir))
+        with open('{}'.format(output_file), 'w') as f:
+            print('writing tokens to {}'.format(output_file))
+            f.write(''.join(tokens))
 
 if __name__ == "__main__":
     try:

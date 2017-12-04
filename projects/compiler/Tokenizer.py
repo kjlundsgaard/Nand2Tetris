@@ -41,6 +41,16 @@ class Tokenizer(object):
         # takes in a single string with file contents
         self.tokens = self.tokenize()
         self.current = ''
+        self.token_output = self.build_output()
+
+    def build_output(self):
+        """builds xml file for tokens"""
+        xml_list = ['<tokens>']
+        for token in self.tokens:
+            xml_list.append('<{token_type}> {token} </{token_type}>'
+                            .format(token_type=token[0], token=token[1]))
+        xml_list.append('</tokens>')
+        return '\n'.join(xml_list)
 
     def has_more_tokens(self):
         """returns true if there are still tokens to be parsed"""
