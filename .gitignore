@@ -3,3 +3,4 @@
 *.hack
 tools/bin/
 *.pyc
+*.xml
