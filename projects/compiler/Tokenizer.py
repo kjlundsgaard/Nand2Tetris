@@ -14,8 +14,8 @@ IDENTIFIERS = '([A-Za-z_]\w*)'
 ELEMENT_INDEX_MAP = {
     0: 'keyword',
     1: 'symbol',
-    2: 'integer',
-    3: 'string',
+    2: 'integerConstant',
+    3: 'stringConstant',
     4: 'identifier'
 }
 

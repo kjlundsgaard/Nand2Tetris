@@ -20,7 +20,8 @@ class CompilationEngine(object):
         self.indent = 0
 
     def compile(self):
-        self.compile_class()
+        while self.tokenizer.has_more_tokens():
+            self.compile_class()
 
     def write_next_token(self, op_replace=None):
         self.tokenizer.advance()
@@ -42,10 +43,12 @@ class CompilationEngine(object):
         while self.tokenizer.has_more_tokens():
             if self.tokenizer.look_ahead()[1] in set(['static', 'field']):
                 self.compile_class_var_dec()
-            if self.tokenizer.look_ahead()[1] in set(['function', 'constructor', 'method']):
+            elif self.tokenizer.look_ahead()[1] in set(['function', 'constructor', 'method']):
                 self.compile_subroutine()
-            if self.tokenizer.look_ahead()[1] == '}':
+            elif self.tokenizer.look_ahead()[1] == '}':
                 self.write_next_token()  # }
+            else:
+                break
         self.decrease_indent()
         self.add_closing_tag('class')
 
@@ -198,12 +201,12 @@ class CompilationEngine(object):
         self.compile_expression()
         self.write_next_token()  # )
         self.write_next_token()  # {
-        self.write_statements()
+        self.compile_statements()
         self.write_next_token()  # }
         if self.tokenizer.look_ahead()[1] == 'else':
             self.write_next_token()  # else
             self.write_next_token()  # {
-            self.write_statements()
+            self.compile_statements()
             self.write_next_token()  # }
         self.decrease_indent()
         self.add_closing_tag('ifStatement')

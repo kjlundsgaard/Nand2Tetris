@@ -16,6 +16,7 @@ class Analyzer(object):
         self.build_file_contents(fordir)
         self.output_file = self.get_output_file(fordir)
         self.tokenizer = Tokenizer(self.file_contents)
+        print self.tokenizer.tokens
         self.compilation_engine = CompilationEngine(self.tokenizer)
 
     def get_output_file(self, fordir):
