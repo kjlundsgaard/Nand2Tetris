@@ -20,9 +20,7 @@ class CompilationEngine(object):
         self.indent = 0
 
     def compile(self):
-        self.add_opening_tag("tokens")
         self.compile_class()
-        self.add_closing_tokens_tag("tokens")
 
     def write_next_token(self, op_replace=None):
         self.tokenizer.advance()
@@ -31,12 +29,11 @@ class CompilationEngine(object):
             token = self.tokenizer.get_token_value()
         else:
             token = op_replace
-        self.contents.append("\t" * self.indent + "<{token_type}>{token}</{token_type}>\n"
+        self.contents.append("\t" * self.indent + "<{token_type}> {token} </{token_type}>\n"
             .format(token_type=token_type, token=token))
 
     # 'class' className '{' classVarDec* subroutineDec* '}'
     def compile_class(self):
-        self.increase_indent()
         self.add_opening_tag('class')
         self.increase_indent()
         self.write_next_token()  # 'class'
@@ -47,7 +44,8 @@ class CompilationEngine(object):
                 self.compile_class_var_dec()
             if self.tokenizer.look_ahead()[1] in set(['function', 'constructor', 'method']):
                 self.compile_subroutine()
-
+            if self.tokenizer.look_ahead()[1] == '}':
+                self.write_next_token()  # }
         self.decrease_indent()
         self.add_closing_tag('class')
 
@@ -90,12 +88,12 @@ class CompilationEngine(object):
 
     # ( (type varName) (',' type varName)*)?
     def compile_param_list(self):
-        self.add_opening_tag('paramList')
+        self.add_opening_tag('parameterList')
         self.increase_indent()
         while self.tokenizer.look_ahead()[1] != ')':
             self.write_next_token()
         self.decrease_indent()
-        self.add_closing_tag('paramList')
+        self.add_closing_tag('parameterList')
 
     # 'var' type varName (',' varName)* ';'
     def compile_var_dec(self):
@@ -112,17 +110,17 @@ class CompilationEngine(object):
     def compile_statements(self):
         self.add_opening_tag('statements')
         self.increase_indent()
-        while self.tokenizer.look_ahead()[1] not in set(['}', 'return']):
+        while self.tokenizer.look_ahead()[1] != '}':
             if self.tokenizer.look_ahead()[1] == 'do':
                 self.compile_do()
             elif self.tokenizer.look_ahead()[1] == 'let':
                 self.compile_let()
             elif self.tokenizer.look_ahead()[1] == 'while':
                 self.compile_while()
-            elif self.tokenizer.look_ahead()[1] == 'return':
-                self.compile_return()
             elif self.tokenizer.look_ahead()[1] == 'if':
                 self.compile_if()
+            elif self.tokenizer.look_ahead()[1] == 'return':
+                self.compile_return()
         self.decrease_indent()
         self.add_closing_tag('statements')
 
@@ -134,16 +132,16 @@ class CompilationEngine(object):
         self.write_next_token()  # do
         self.write_next_token()  # subroutineName|className|varName
         # entering expressionlist
-        # import pdb;pdb.set_trace()
         if self.tokenizer.look_ahead()[1] == '(':
             self.write_next_token()  # (
             self.compile_expression_list()
-            self.write_next_token() # )
+            self.write_next_token()  # )
         elif self.tokenizer.look_ahead()[1] == '.':
             self.write_next_token()  # .
+            self.write_next_token()  # subroutineName
             self.write_next_token()  # (
             self.compile_expression_list()
-            self.write.next_token()  # )
+            self.write_next_token()  # )
         self.write_next_token()  # ;
         self.decrease_indent()
         self.add_closing_tag('doStatement')

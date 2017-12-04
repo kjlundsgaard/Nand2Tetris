@@ -23,9 +23,9 @@ class Analyzer(object):
         creates name of xml output file to be written to
         """
         if fordir.endswith('.jack'):
-            return '{}.xml'.format(os.path.abspath(fordir)[:-5])
+            return '{}TEST.xml'.format(os.path.abspath(fordir)[:-5])
         else:
-            return '{}.xml'.format(os.path.abspath(fordir))
+            return '{}TEST.xml'.format(os.path.abspath(fordir))
 
     def build_file_contents(self, fordir):
         """
@@ -60,9 +60,9 @@ class Analyzer(object):
 
     def write_file(self, contents):
         """writes to xml file"""
-        with open('{}TEST'.format(self.output_file), 'w') as output_file:
-            print('writing to {}TEST'.format(self.output_file))
-            output_file.write('\n'.join(self.contents))
+        with open('{}'.format(self.output_file), 'w') as output_file:
+            print('writing to {}'.format(self.output_file))
+            output_file.write(''.join(self.compilation_engine.contents))
 
 
 if __name__ == "__main__":
