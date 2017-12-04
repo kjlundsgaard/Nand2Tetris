@@ -220,6 +220,8 @@ class CompilationEngine(object):
             next_token_value = self.tokenizer.look_ahead()[1]
             if next_token_value in set(['>', '<', '&']):
                 self.write_next_token(op_replace=op_translate[next_token_value])  # op
+            elif next_token_value == ',':
+                break
             else:
                 self.write_next_token()  # op
             self.compile_term()
@@ -266,8 +268,9 @@ class CompilationEngine(object):
     def compile_expression_list(self):
         self.add_opening_tag('expressionList')
         self.increase_indent()
-        # can there be an expression with a ) in it?
         while self.tokenizer.look_ahead()[1] not in set([')', ']']):
+            if self.tokenizer.look_ahead()[1] == ',':
+                self.write_next_token()  # ,
             self.compile_expression()
         self.decrease_indent()
         self.add_closing_tag('expressionList')
