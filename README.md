@@ -12,10 +12,14 @@ These are my completed projects for Nand2Tetris, which aims to build a computer 
 
 4. Wrote a program that multiplies two integers as well as a program that fills all of a screen's pixels with black when a keyboard key is pressed, both written in an assembly language
 
-5. Build CPU and RAM (including screen and keyboard memory) in HDL, and combine with ROM32K to build full Computer chip
+5. Built CPU and RAM (including screen and keyboard memory) in HDL, and combine with ROM32K to build full Computer chip
 
-6. Write an assembler that takes in a file written in the hack assembly language and outputs the file assembled into binary
+6. Wrote an assembler that takes in a file written in the hack assembly language and outputs the file assembled into binary
 
-7. Implement a VM Translator that takes in a directory with files or single file written in VM code and outputs a file with corresponding hack assembly commands
+7. Implemented a VM Translator that takes in a directory with files or single file written in VM code and outputs a file with corresponding hack assembly commands
 
-8. Allow VM Translator to take in a directory and call a Sys.init function as well as handle other function calls and outputs a single file in hack assembly
+8. Allowed VM Translator to take in a directory and call a Sys.init function as well as handle other function calls and outputs a single file in hack assembly
+
+9. Jack Language
+
+10. Wrote a tokenizer and parser for the Jack language that outputs an Abstract Syntax Tree in xml for Jack programs
