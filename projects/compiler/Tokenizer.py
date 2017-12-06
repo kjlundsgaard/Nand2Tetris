@@ -36,12 +36,19 @@ class Tokenizer(object):
     """
     Takes single or multiple .jack files and tokenizes the files
     """
-    def __init__(self, file_contents):
-        self.file_contents = file_contents
+    def __init__(self, f):
+        self.filename = f
+        self.file_contents = ''.join(self.read_file())
         # takes in a single string with file contents
         self.tokens = self.tokenize()
         self.current = ''
         self.token_output = self.build_output()
+
+    def read_file(self):
+        """opens the input file"""
+        with open(self.filename) as f:
+            data = f.readlines()
+        return data
 
     def build_output(self):
         """builds xml file for tokens"""

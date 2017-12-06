@@ -1,7 +1,7 @@
 import os
 import sys
-from Tokenizer import Tokenizer
-from CompilationEngine import CompilationEngine
+from tokenizer import Tokenizer
+from compilationengine import CompilationEngine
 
 
 class Analyzer(object):
@@ -13,67 +13,41 @@ class Analyzer(object):
     """
 
     def __init__(self, fordir):
-        self.build_file_contents(fordir)
-        self.output_file = self.get_output_file(fordir)
-        self.tokenizer = Tokenizer(self.file_contents)
-        self.write_tokens(self.tokenizer.token_output, fordir)
-        self.compilation_engine = CompilationEngine(self.tokenizer)
+        self.files = self.get_files_from_directory(fordir)
 
-    def get_output_file(self, fordir):
-        """
-        creates name of xml output file to be written to
-        """
+    def get_files_from_directory(self, fordir):
+        """takes in a file or single directory and gets all *.jack files in that path"""
         if fordir.endswith('.jack'):
-            return '{}kt.xml'.format(os.path.abspath(fordir)[:-5])
+            return [os.path.abspath(fordir)]
         else:
-            return '{}kt.xml'.format(os.path.abspath(fordir))
+            directory = fordir
+            return ['{}'.format(os.path.abspath(os.path.join(directory, each))) for each in os.listdir(fordir) if each.endswith('.jack')]
 
-    def build_file_contents(self, fordir):
-        """
-        determines if a file or directory has been passed in and
-        calls appropriate read_file method to build the file_contents attribute
-        """
-        self.file_contents = []
-        if fordir.endswith('.jack'):
-            self.file_contents.extend(self.read_file(fordir))
-        else:
-            files = self.get_files_from_directory(fordir)
-            for f in files:
-                self.file_contents.extend(self.read_file(f))
-        self.file_contents = ''.join(self.file_contents)
+    def write_tokens(self, tokenizer):
+        """writes tokens to xml file"""
+        output_file = '{}ktT.xml'.format(tokenizer.filename[:-5])
+        with open(output_file, 'w') as f:
+            print 'writing tokens to {}'.format(output_file)
+            f.write(''.join(tokenizer.token_output))
 
-    def get_files_from_directory(self, folder):
-        """takes in a single directory and gets all *.jack files in that path"""
-        return ['{}'.format(os.path.abspath(each)) for each in os.listdir(folder) if each.endswith('.jack')]
-
-    def read_file(self, filename):
-        """opens the input file"""
-        with open(filename) as f:
-            data = f.readlines()
-        return data
+    def write_syntax_tree(self, compilation_engine):
+        """writes parse tree to xml file"""
+        output_file = '{}ktCST.xml'.format(compilation_engine.filename[:-5])
+        with open(output_file, 'w') as f:
+            print 'writing syntax tree to {}'.format(output_file)
+            f.write(''.join(compilation_engine.contents))
 
     def analyze(self):
         """
         uses compilation engine to compile tokenized input
         """
-        self.compilation_engine.compile()
-        self.write_file(self.compilation_engine.contents)
+        for f in self.files:
+            tokenizer = Tokenizer(f)
+            self.write_tokens(tokenizer)
+            compilation_engine = CompilationEngine(tokenizer, f)
+            compilation_engine.compile()
+            self.write_syntax_tree(compilation_engine)
 
-    def write_file(self, contents):
-        """writes to xml file"""
-        with open('{}'.format(self.output_file), 'w') as output_file:
-            print('writing to {}'.format(self.output_file))
-            output_file.write(''.join(self.compilation_engine.contents))
-
-    def write_tokens(self, tokens, fordir):
-        """writes tokens to xml file"""
-        if fordir.endswith('.jack'):
-            output_file = '{}ktT.xml'.format(os.path.abspath(fordir)[:-5])
-        else:
-            output_file = '{}ktT.xml'.format(os.path.abspath(fordir))
-        with open('{}'.format(output_file), 'w') as f:
-            print('writing tokens to {}'.format(output_file))
-            f.write(''.join(tokens))
 
 if __name__ == "__main__":
     try:

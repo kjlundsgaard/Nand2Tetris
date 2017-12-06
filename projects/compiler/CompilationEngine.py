@@ -14,14 +14,14 @@ class CompilationEngine(object):
     """
     Compiles tokenized input
     """
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer, filename):
+        self.filename = filename
         self.tokenizer = tokenizer
         self.contents = []
         self.indent = 0
 
     def compile(self):
-        while self.tokenizer.has_more_tokens():
-            self.compile_class()
+        self.compile_class()
 
     def write_next_token(self, op_replace=None):
         self.tokenizer.advance()
@@ -47,8 +47,6 @@ class CompilationEngine(object):
                 self.compile_subroutine()
             elif self.tokenizer.look_ahead()[1] == '}':
                 self.write_next_token()  # }
-            else:
-                break
         self.decrease_indent()
         self.add_closing_tag('class')
 
