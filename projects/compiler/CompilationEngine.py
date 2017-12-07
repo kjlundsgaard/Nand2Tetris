@@ -1,3 +1,4 @@
+from symboltable import SymbolTable
 
 ops = set(['+', '-', '*', '/', '&', '|', '<', '>', '='])
 
@@ -30,15 +31,22 @@ class CompilationEngine(object):
             token = self.tokenizer.get_token_value()
         else:
             token = op_replace
-        self.contents.append("\t" * self.indent + "<{token_type}> {token} </{token_type}>\n"
-            .format(token_type=token_type, token=token))
+        if token_type == 'identifier':
+            # assign to corresponding symbol table
+
+            self.contents.append("\t" * self.indent + "<{token_type}> {token} </{token_type}>\n"
+                .format(token_type=token_type, token=token))
+
+        return token
 
     # 'class' className '{' classVarDec* subroutineDec* '}'
     def compile_class(self):
+        # create symbol table for class
+        self.symbol_table = SymbolTable()
         self.add_opening_tag('class')
         self.increase_indent()
         self.write_next_token()  # 'class'
-        self.write_next_token()  # className
+        self.class_name = self.write_next_token()  # className
         self.write_next_token()  # {
         while self.tokenizer.has_more_tokens():
             if self.tokenizer.look_ahead()[1] in set(['static', 'field']):
@@ -52,16 +60,21 @@ class CompilationEngine(object):
 
     # ('static' | 'field' ) type varName (',' varName)* ';'
     def compile_class_var_dec(self):
+        tokens = []
         self.add_opening_tag('classVarDec')
         self.increase_indent()
         while self.tokenizer.look_ahead()[1] != ';':
-            self.write_next_token()
+            tokens.append(self.write_next_token())
+        self.symbol_table.add_class_var(tokens)
         self.write_next_token()
         self.decrease_indent()
         self.add_closing_tag('classVarDec')
 
     # ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     def compile_subroutine(self):
+        self.symbol_table.reset_subroutine()
+        # add class to sub_symbols table
+        self.symbol_table.add_sub_var('arg', self.class_name, 'this')
         self.add_opening_tag('subroutineDec')
         self.increase_indent()
         while self.tokenizer.look_ahead()[1] != '(':
@@ -92,7 +105,14 @@ class CompilationEngine(object):
         self.add_opening_tag('parameterList')
         self.increase_indent()
         while self.tokenizer.look_ahead()[1] != ')':
+            token = self.tokenizer.look_ahead()
+            if token[0] == 'keyword':
+                token_type = token[1]
+            if token[0] == 'identifier':
+                token_name = token[1]
+                self.symbol_table.add_sub_var('arg', token_type, token_name)
             self.write_next_token()
+        import pdb;pdb.set_trace()
         self.decrease_indent()
         self.add_closing_tag('parameterList')
 
