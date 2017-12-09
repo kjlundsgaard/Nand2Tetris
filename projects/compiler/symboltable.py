@@ -38,3 +38,10 @@ class SymbolTable(object):
         self.arg_index = 0
         self.var_index = 0
         self.sub_symbols = {}
+
+    def num_field_vars(self):
+        result = 0
+        for item in self.class_symbols:
+            if self.class_symbols[item]['kind'] == 'field':
+                result += 1
+        return result

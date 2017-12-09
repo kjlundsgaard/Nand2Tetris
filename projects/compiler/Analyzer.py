@@ -1,7 +1,7 @@
 import os
 import sys
 from tokenizer import Tokenizer
-from compilationengine import CompilationEngine
+from CompilationEngine import CompilationEngine
 
 
 class Analyzer(object):
