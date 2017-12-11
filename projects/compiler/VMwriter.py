@@ -57,6 +57,18 @@ class VMWriter(object):
         command = 'function {} {}'.format(f_name, num_locals)
         self.commands.append(command)
 
+    def write_label(self, label):
+        command = 'label {}'.format(label)
+        self.commands.append(command)
+
+    def write_goto(self, label):
+        command = 'goto {}'.format(label)
+        self.commands.append(command)
+
+    def write_if(self, label):
+        command = 'if-goto {}'.format(label)
+        self.commands.append(command)
+
     def create_file(self, filename):
         with open('{}TEST.vm'.format(filename), 'w') as f:
             f.write('\n'.join(self.commands))

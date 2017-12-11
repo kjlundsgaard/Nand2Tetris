@@ -22,6 +22,7 @@ class CompilationEngine(object):
         self.VMwriter = VMWriter()
         self.contents = []
         self.indent = 0
+        self.label_index = 0
 
     def compile(self):
         self.compile_class()
@@ -256,13 +257,18 @@ class CompilationEngine(object):
         self.add_opening_tag('whileStatement')
         self.increase_indent()
         self.write_next_token()  # while
+        self.VMwriter.write_label('WHILE_COND{}'.format(self.label_index))
         self.write_next_token()  # (
         self.compile_expression()
-        self. write_next_token()  # )
+        self.write_next_token()  # )
+        self.VMwriter.write_arithmetic('~', unary=True)
+        self.VMwriter.write_if('END_WHILE{}'.format(self.label_index))
         self.write_next_token()  # {
         while self.tokenizer.look_ahead()[1] != '}':
             self.compile_statements()
         self.write_next_token()  # }
+        self.VMwriter.write_goto('WHILE_COND{}'.format(self.label_index))
+        self.VMwriter.write_label('END_WHILE{}'.format(self.label_index))
         self.decrease_indent()
         self.add_closing_tag('whileStatement')
 
@@ -283,6 +289,8 @@ class CompilationEngine(object):
         self.add_closing_tag('returnStatement')
 
     # 'if' '(' expression ')' '{' statements '}' ( 'else' '{' statements '}' )?
+    #  if (expression) {s1} else {s2}
+    #  if (expression) {s1} ==> not expression; if-goto l1; s1; l1
     def compile_if(self):
         self.add_opening_tag('ifStatement')
         self.increase_indent()
@@ -290,14 +298,28 @@ class CompilationEngine(object):
         self.write_next_token()  # (
         self.compile_expression()
         self.write_next_token()  # )
+        # not expression
+        self.VMwriter.write_arithmetic('~', unary=True)
+        # if-goto l1
+        self.VMwriter.write_if('IF_FALSE{}'.format(self.label_index))
+        # s1
         self.write_next_token()  # {
-        self.compile_statements()
+        self.compile_statements()  # s1
         self.write_next_token()  # }
-        if self.tokenizer.look_ahead()[1] == 'else':
+        # [else]
+        # goto end
+        self.VMwriter.write_goto('END_OF_IF{}'.format(self.label_index))
+        self.VMwriter.write_label('IF_FALSE{}'.format(self.label_index))
+
+        if self.tokenizer.look_ahead()[1] == 'else':  # l1
             self.write_next_token()  # else
+            # write label for else code executions
             self.write_next_token()  # {
-            self.compile_statements()
+            self.compile_statements()  # s2
             self.write_next_token()  # }
+        # end
+        self.VMwriter.write_label('END_OF_IF{}'.format(self.label_index))
+        self.label_index += 1
         self.decrease_indent()
         self.add_closing_tag('ifStatement')
 
