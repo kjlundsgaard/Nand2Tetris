@@ -11,7 +11,8 @@ class SymbolTable(object):
         kind = tokens[0]
         cl_type = tokens[1]
         for name in tokens[2:]:
-            self.add_symbol(self.class_symbols, kind, cl_type, name)
+            if name != ',':
+                self.add_symbol(self.class_symbols, kind, cl_type, name)
 
     def add_sub_var(self, kind, cl_type, name):
         self.add_symbol(self.sub_symbols, kind, cl_type, name)

@@ -56,3 +56,7 @@ class VMWriter(object):
     def write_function(self, f_name, num_locals):
         command = 'function {} {}'.format(f_name, num_locals)
         self.commands.append(command)
+
+    def create_file(self, filename):
+        with open('{}TEST.vm'.format(filename), 'w') as f:
+            f.write('\n'.join(self.commands))

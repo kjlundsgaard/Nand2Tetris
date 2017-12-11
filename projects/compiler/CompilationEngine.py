@@ -79,6 +79,7 @@ class CompilationEngine(object):
         self.add_opening_tag('subroutineDec')
         self.increase_indent()
         f_type = self.write_next_token()  # constructor|function|method
+        # if f_type in {'method', 'constructor'}:
         if f_type == 'method':
             self.symbol_table.add_sub_var('arg', self.class_name, 'this')
         self.write_next_token()  # 'void'|type
@@ -105,7 +106,6 @@ class CompilationEngine(object):
             self.VMwriter.write_push('constant', num_fields)
             self.VMwriter.write_call('Memory.alloc', 1)
             self.VMwriter.write_pop('pointer', 0)
-        # import pdb;pdb.set_trace()
         self.compile_subroutine_body()
         self.decrease_indent()
         self.add_closing_tag('subroutineDec')
@@ -185,9 +185,7 @@ class CompilationEngine(object):
         if self.tokenizer.look_ahead()[1] == '(':
             self.write_next_token()  # (
             # first push class as "this"
-            this_kind = self.symbol_table.sub_symbols['this']['kind']
-            this_index = self.symbol_table.sub_symbols['this']['index']
-            self.VMwriter.write_push(this_kind, this_index)
+            self.VMwriter.write_push('pointer', 0)
             num_exp = self.compile_expression_list() + 1
             self.write_next_token()  # )
             self.VMwriter.write_call('{}.{}'.format(self.class_name, call_name), num_exp)
@@ -373,8 +371,8 @@ class CompilationEngine(object):
                     if token in {'null', 'false'}:
                         self.VMwriter.write_push('constant', 0)
                     elif token == 'true':
-                        self.VMwriter.write_push('constant', 1)
-                        self.VMwriter.write_arithmetic('-', unary=True)
+                        self.VMwriter.write_push('constant', 0)
+                        self.VMwriter.write_arithmetic('~', unary=True)
                     elif token == 'this':
                         self.VMwriter.write_push('pointer', 0)
                     else:

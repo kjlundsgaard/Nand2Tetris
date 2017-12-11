@@ -47,6 +47,8 @@ class Analyzer(object):
             compilation_engine = CompilationEngine(tokenizer, f)
             compilation_engine.compile()
             self.write_syntax_tree(compilation_engine)
+            # import pdb;pdb.set_trace()
+            compilation_engine.VMwriter.create_file(f[:-5])
 
 
 if __name__ == "__main__":
