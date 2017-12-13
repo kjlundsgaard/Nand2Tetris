@@ -70,5 +70,6 @@ class VMWriter(object):
         self.commands.append(command)
 
     def create_file(self, filename):
-        with open('{}TEST.vm'.format(filename), 'w') as f:
+        print "writing VM commands to {}.vm".format(filename)
+        with open('{}.vm'.format(filename), 'w') as f:
             f.write('\n'.join(self.commands))

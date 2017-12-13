@@ -22,11 +22,11 @@ class CompilationEngine(object):
         self.VMwriter = VMWriter()
         self.contents = []
         self.indent = 0
-        self.label_index = 0
+        # self.label_index = 0
 
     def compile(self):
         self.compile_class()
-        print self.VMwriter.commands
+        # print self.VMwriter.commands
 
     def write_next_token(self, op_replace=None):
         self.tokenizer.advance()
@@ -201,6 +201,9 @@ class CompilationEngine(object):
                 call_name = symbol['type']
             # Math.multiply(x, y)
             num_exp = self.compile_expression_list()
+            if symbol:
+                # this means we're operating on a method
+                num_exp += 1
             # writes the VM command that calls the function with number of args
             self.VMwriter.write_call('{}.{}'.format(call_name, method_name), num_exp)
             self.write_next_token()  # )
@@ -257,18 +260,18 @@ class CompilationEngine(object):
         self.add_opening_tag('whileStatement')
         self.increase_indent()
         self.write_next_token()  # while
-        self.VMwriter.write_label('WHILE_COND{}'.format(self.label_index))
+        self.VMwriter.write_label('WHILE_COND{}'.format(self.indent))
         self.write_next_token()  # (
         self.compile_expression()
         self.write_next_token()  # )
         self.VMwriter.write_arithmetic('~', unary=True)
-        self.VMwriter.write_if('END_WHILE{}'.format(self.label_index))
+        self.VMwriter.write_if('END_WHILE{}'.format(self.indent))
         self.write_next_token()  # {
         while self.tokenizer.look_ahead()[1] != '}':
             self.compile_statements()
         self.write_next_token()  # }
-        self.VMwriter.write_goto('WHILE_COND{}'.format(self.label_index))
-        self.VMwriter.write_label('END_WHILE{}'.format(self.label_index))
+        self.VMwriter.write_goto('WHILE_COND{}'.format(self.indent))
+        self.VMwriter.write_label('END_WHILE{}'.format(self.indent))
         self.decrease_indent()
         self.add_closing_tag('whileStatement')
 
@@ -301,15 +304,15 @@ class CompilationEngine(object):
         # not expression
         self.VMwriter.write_arithmetic('~', unary=True)
         # if-goto l1
-        self.VMwriter.write_if('IF_FALSE{}'.format(self.label_index))
+        self.VMwriter.write_if('IF_FALSE{}'.format(self.indent))
         # s1
         self.write_next_token()  # {
         self.compile_statements()  # s1
         self.write_next_token()  # }
         # [else]
         # goto end
-        self.VMwriter.write_goto('END_OF_IF{}'.format(self.label_index))
-        self.VMwriter.write_label('IF_FALSE{}'.format(self.label_index))
+        self.VMwriter.write_goto('END_OF_IF{}'.format(self.indent))
+        self.VMwriter.write_label('IF_FALSE{}'.format(self.indent))
 
         if self.tokenizer.look_ahead()[1] == 'else':  # l1
             self.write_next_token()  # else
@@ -318,8 +321,8 @@ class CompilationEngine(object):
             self.compile_statements()  # s2
             self.write_next_token()  # }
         # end
-        self.VMwriter.write_label('END_OF_IF{}'.format(self.label_index))
-        self.label_index += 1
+        self.VMwriter.write_label('END_OF_IF{}'.format(self.indent))
+        # self.label_index += 1
         self.decrease_indent()
         self.add_closing_tag('ifStatement')
 
