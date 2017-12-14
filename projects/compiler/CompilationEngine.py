@@ -85,7 +85,6 @@ class CompilationEngine(object):
             self.symbol_table.add_sub_var('arg', self.class_name, 'this')
         self.write_next_token()  # 'void'|type
         f_name = self.write_next_token()  # subroutineName
-        self.write_next_token()  # (
         self.compile_param_list()
         self.write_next_token()  # )
         # tokens = { varDec*
@@ -127,11 +126,17 @@ class CompilationEngine(object):
         self.increase_indent()
         while self.tokenizer.look_ahead()[1] != ')':
             token = self.tokenizer.look_ahead()
-            if token[0] == 'keyword':
+            # ( OR ,
+            if token[0] == 'symbol':
+                token_type = None
+            elif token[0] == 'keyword':
                 token_type = token[1]
-            if token[0] == 'identifier':
-                token_name = token[1]
-                self.symbol_table.add_sub_var('arg', token_type, token_name)
+            else:
+                if token_type:
+                    token_name = token[1]
+                    self.symbol_table.add_sub_var('arg', token_type, token_name)
+                else:
+                    token_type = token[1]
             self.write_next_token()
         self.decrease_indent()
         self.add_closing_tag('parameterList')
@@ -380,8 +385,9 @@ class CompilationEngine(object):
                         self.write_next_token()  # ]
                         # add token and index (from compiled expression)
                         self.VMwriter.write_arithmetic('+')
-                        # pop pointer 1
+                        # pop pointer 1 (stores base address of that)
                         self.VMwriter.write_pop('pointer', 1)
+                        # put dereferenced value of THAT on the stack
                         self.VMwriter.write_push('that', 0)
                 # intConstant, stringConstant, keywordConstant
                 elif token_type == 'integerConstant':
