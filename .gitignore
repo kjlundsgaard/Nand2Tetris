@@ -4,3 +4,4 @@
 tools/bin/
 *.pyc
 *.xml
+*.asm

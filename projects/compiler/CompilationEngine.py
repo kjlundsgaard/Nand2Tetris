@@ -22,7 +22,7 @@ class CompilationEngine(object):
         self.VMwriter = VMWriter()
         self.contents = []
         self.indent = 0
-        # self.label_index = 0
+        self.label_index = 0
 
     def compile(self):
         self.compile_class()
@@ -254,29 +254,31 @@ class CompilationEngine(object):
             self.VMwriter.write_push('temp', 0)
             self.VMwriter.write_pop('that', 0)
         else:
-            self.VMwriter.write_pop(symbol['kind'], symbol['index'])
             # pop symboltable[symbol]
+            self.VMwriter.write_pop(symbol['kind'], symbol['index'])
         self.write_next_token()  # ;
         self.decrease_indent()
         self.add_closing_tag('letStatement')
 
     # 'while' '(' expression ')' '{' statements '}'
     def compile_while(self):
+        self.label_index += 1
+        label = self.label_index
         self.add_opening_tag('whileStatement')
         self.increase_indent()
         self.write_next_token()  # while
-        self.VMwriter.write_label('WHILE_COND{}'.format(self.indent))
+        self.VMwriter.write_label('WHILE_COND{}'.format(label))
         self.write_next_token()  # (
         self.compile_expression()
         self.write_next_token()  # )
         self.VMwriter.write_arithmetic('~', unary=True)
-        self.VMwriter.write_if('END_WHILE{}'.format(self.indent))
+        self.VMwriter.write_if('END_WHILE{}'.format(label))
         self.write_next_token()  # {
         while self.tokenizer.look_ahead()[1] != '}':
             self.compile_statements()
         self.write_next_token()  # }
-        self.VMwriter.write_goto('WHILE_COND{}'.format(self.indent))
-        self.VMwriter.write_label('END_WHILE{}'.format(self.indent))
+        self.VMwriter.write_goto('WHILE_COND{}'.format(label))
+        self.VMwriter.write_label('END_WHILE{}'.format(label))
         self.decrease_indent()
         self.add_closing_tag('whileStatement')
 
@@ -300,34 +302,29 @@ class CompilationEngine(object):
     #  if (expression) {s1} else {s2}
     #  if (expression) {s1} ==> not expression; if-goto l1; s1; l1
     def compile_if(self):
+        self.label_index += 1
+        label = self.label_index
         self.add_opening_tag('ifStatement')
         self.increase_indent()
         self.write_next_token()  # if
         self.write_next_token()  # (
         self.compile_expression()
         self.write_next_token()  # )
-        # not expression
-        self.VMwriter.write_arithmetic('~', unary=True)
-        # if-goto l1
-        self.VMwriter.write_if('IF_FALSE{}'.format(self.indent))
-        # s1
+        self.VMwriter.write_if('IF_TRUE{}'.format(label))
+        self.VMwriter.write_goto('IF_FALSE{}'.format(label))
+        self.VMwriter.write_label('IF_TRUE{}'.format(label))
         self.write_next_token()  # {
         self.compile_statements()  # s1
         self.write_next_token()  # }
         # [else]
         # goto end
-        self.VMwriter.write_goto('END_OF_IF{}'.format(self.indent))
-        self.VMwriter.write_label('IF_FALSE{}'.format(self.indent))
-
+        self.VMwriter.write_label('IF_FALSE{}'.format(label))
         if self.tokenizer.look_ahead()[1] == 'else':  # l1
             self.write_next_token()  # else
             # write label for else code executions
             self.write_next_token()  # {
             self.compile_statements()  # s2
             self.write_next_token()  # }
-        # end
-        self.VMwriter.write_label('END_OF_IF{}'.format(self.indent))
-        # self.label_index += 1
         self.decrease_indent()
         self.add_closing_tag('ifStatement')
 
@@ -338,11 +335,6 @@ class CompilationEngine(object):
         self.compile_term()  # term
         while self.tokenizer.look_ahead()[1] in ops:
             self.tokenizer.look_ahead()[1]
-            # if next_token_value in set(['>', '<', '&']):
-            #     self.write_next_token(op_replace=op_translate[next_token_value])  # op
-            # elif next_token_value == ',':
-            #     break
-            # else:
             operation = self.write_next_token()  # op
             self.compile_term()
             self.VMwriter.write_arithmetic(operation)
