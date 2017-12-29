@@ -318,6 +318,7 @@ class CompilationEngine(object):
         self.write_next_token()  # }
         # [else]
         # goto end
+        self.VMwriter.write_goto('IF_END{}'.format(label))
         self.VMwriter.write_label('IF_FALSE{}'.format(label))
         if self.tokenizer.look_ahead()[1] == 'else':  # l1
             self.write_next_token()  # else
@@ -325,6 +326,7 @@ class CompilationEngine(object):
             self.write_next_token()  # {
             self.compile_statements()  # s2
             self.write_next_token()  # }
+        self.VMwriter.write_label('IF_END{}'.format(label))
         self.decrease_indent()
         self.add_closing_tag('ifStatement')
 

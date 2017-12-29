@@ -4,4 +4,5 @@
 tools/bin/
 *.pyc
 *.xml
-*.asm
+*.asmi
+*.vm
