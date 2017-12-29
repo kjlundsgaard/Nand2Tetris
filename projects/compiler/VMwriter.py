@@ -32,7 +32,6 @@ class VMWriter(object):
         self.commands = []
 
     def write_call(self, method_name, num_args):
-        # TODO: probably need to deal with pop pointer 0/setting "this" segment of RAM
         command = 'call {} {}'.format(method_name, num_args)
         self.commands.append(command)
 
